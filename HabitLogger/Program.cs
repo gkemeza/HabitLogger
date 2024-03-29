@@ -3,7 +3,7 @@
 // + create a sqlite database on start (if it doesn't exist) and create a table
 // + show the user a menu of options
 // get date from user
-// users can insert~, delete, update and view+ their logged habit
+// users can insert~, delete+, update and view+ their logged habit
 // fix all errors
 
 internal class Program
@@ -24,7 +24,7 @@ internal class Program
             count INTEGER
         );";
 
-            Console.WriteLine($"Command text: {tableCommand.CommandText}");
+            //Console.WriteLine($"Command text: {tableCommand.CommandText}");
 
             tableCommand.ExecuteNonQuery();
             connection.Close();
@@ -48,7 +48,7 @@ internal class Program
                     InsertRecord();
                     break;
                 case "3":
-                    //DeleteRecord();
+                    DeleteRecord();
                     break;
                 case "4":
                     //UpdateRecord();
@@ -85,6 +85,7 @@ internal class Program
 
     static void ViewRecords()
     {
+        Console.Clear();
         string connectionSource = @"Data Source=HabitLogger.db";
 
         using (var connection = new SqliteConnection(connectionSource))
@@ -99,8 +100,10 @@ internal class Program
                 Console.WriteLine("Water glasses each day:");
                 while (reader.Read())
                 {
-                    Console.WriteLine($"{reader.GetInt32(2)} glasses");
+                    Console.Write($"\n#{reader.GetInt32(0)} => ");
+                    Console.Write($"{reader.GetInt32(2)} glasses");
                 }
+                Console.WriteLine();
             }
 
             connection.Close();
@@ -109,6 +112,7 @@ internal class Program
 
     static void InsertRecord()
     {
+        Console.Clear();
         string connectionSource = @"Data Source=HabitLogger.db";
 
         using (var connection = new SqliteConnection(connectionSource))
@@ -134,6 +138,53 @@ internal class Program
             }
 
             tableCommand.ExecuteNonQuery();
+            connection.Close();
+        }
+    }
+
+    static void DeleteRecord()
+    {
+        Console.Clear();
+        string connectionSource = @"Data Source=HabitLogger.db";
+
+        using (var connection = new SqliteConnection(connectionSource))
+        {
+            connection.Open();
+            var tableCommand = connection.CreateCommand();
+
+            Console.WriteLine("Choose id to delete:");
+
+            while (true)
+            {
+                string input = Console.ReadLine();
+
+                if (int.TryParse(input, out int number))
+                {
+                    tableCommand.CommandText = $"DELETE FROM water_glasses WHERE id = ({number});";
+                }
+                else
+                {
+                    Console.WriteLine("Wrong input. Enter a whole number:");
+                }
+
+                int rowsDeleted = tableCommand.ExecuteNonQuery();
+
+                if (rowsDeleted == 0)
+                {
+                    Console.WriteLine($"ID {number} doesn't exist. View records to get id's");
+                    break;
+                }
+                else if (rowsDeleted == -1)
+                {
+                    continue;
+                }
+                else
+                {
+                    Console.WriteLine($"Record ID {number} deleted");
+                    break;
+                }
+            }
+
             connection.Close();
         }
     }
