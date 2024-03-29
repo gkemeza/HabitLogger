@@ -2,9 +2,10 @@
 
 // + create a sqlite database on start (if it doesn't exist) and create a table
 // + show the user a menu of options
-// get date from user
-// users can insert~, delete+, update and view+ their logged habit
+// get date from user?
+// users can insert~, delete+, update+ and view+ their logged habit
 // fix all errors
+// create a read me file
 
 internal class Program
 {
@@ -51,7 +52,7 @@ internal class Program
                     DeleteRecord();
                     break;
                 case "4":
-                    //UpdateRecord();
+                    UpdateRecord();
                     break;
             }
         }
@@ -160,7 +161,7 @@ internal class Program
 
                 if (int.TryParse(input, out int number))
                 {
-                    tableCommand.CommandText = $"DELETE FROM water_glasses WHERE id = ({number});";
+                    tableCommand.CommandText = $"DELETE FROM water_glasses WHERE id = {number};";
                 }
                 else
                 {
@@ -181,6 +182,62 @@ internal class Program
                 else
                 {
                     Console.WriteLine($"Record ID {number} deleted");
+                    break;
+                }
+            }
+
+            connection.Close();
+        }
+    }
+
+    static void UpdateRecord()
+    {
+        Console.Clear();
+        string connectionSource = @"Data Source=HabitLogger.db";
+
+        using (var connection = new SqliteConnection(connectionSource))
+        {
+            connection.Open();
+            var tableCommand = connection.CreateCommand();
+
+            while (true)
+            {
+                Console.WriteLine("\nChoose id to update:");
+                string input = Console.ReadLine();
+
+                if (int.TryParse(input, out int number))
+                {
+                    Console.WriteLine("Choose a new number of glasses: ");
+                    string input2 = Console.ReadLine();
+
+                    if (int.TryParse(input2, out int newNumber))
+                    {
+                        tableCommand.CommandText = $"UPDATE water_glasses SET count = {newNumber} WHERE id = {number};";
+                    }
+                    else
+                    {
+                        Console.WriteLine("Wrong input number.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Wrong input id");
+                }
+
+                int rowsDeleted = tableCommand.ExecuteNonQuery();
+
+                if (rowsDeleted == 0)
+                {
+                    Console.WriteLine($"ID {number} doesn't exist. View records to get id's");
+                    break;
+                }
+                else if (rowsDeleted == -1)
+                {
+                    continue;
+                }
+                else
+                {
+                    Console.WriteLine($"Record ID {number} updated");
                     break;
                 }
             }
