@@ -2,37 +2,64 @@
 
 // + create a sqlite database on start (if it doesn't exist) and create a table
 // + show the user a menu of options
-// get date from user?
-// users can insert~, delete+, update+ and view+ their logged habit
-// users can create their own habits, choose the unit of measurement of each habit
-// Seed Data into the database automatically when the database gets created for the first time,
+// + users can insert~, delete+, update+ and view+ their logged habit
+// + users can create their own habits+, choose the unit of measurement of each habit+
+// - Seed Data into the database automatically when the database gets created for the first time,
 //      (generating a few habits and inserting a hundred records with randomly generated values)
-// a report functionality where the users can view specific information
-// fix all errors
-// create a read me file
+// - get date from user (in Insert method?)
+// - a report functionality where the users can view specific information
+// - fix all errors
+// - create a read me file
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-        string connectionSource = @"Data Source=HabitLogger.db";
+        string habbitName = "";
+        string habbitMeasurement = "";
 
-        using (var connection = new SqliteConnection(connectionSource))
+        if (!File.Exists("HabitLogger.db"))
         {
-            connection.Open();
-            var tableCommand = connection.CreateCommand();
+            while (true)
+            {
+                Console.WriteLine("Choose a name for your habit (no spaces):");
+                habbitName = Console.ReadLine();
 
-            tableCommand.CommandText = @"
-        CREATE TABLE IF NOT EXISTS water_glasses ( 
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date DATE,
-            count INTEGER
-        );";
+                Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
+                habbitMeasurement = Console.ReadLine();
 
-            //Console.WriteLine($"Command text: {tableCommand.CommandText}");
+                string connectionSource = @"Data Source=HabitLogger.db";
 
-            tableCommand.ExecuteNonQuery();
-            connection.Close();
+                using (var connection = new SqliteConnection(connectionSource))
+                {
+                    connection.Open();
+                    var tableCommand = connection.CreateCommand();
+
+                    tableCommand.CommandText = @$"
+                        CREATE TABLE IF NOT EXISTS {habbitName} ( 
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            date DATE,
+                            {habbitMeasurement} INTEGER
+                        );";
+
+                    Console.WriteLine($"Command text: {tableCommand.CommandText}");
+
+                    try
+                    {
+                        tableCommand.ExecuteNonQuery();
+                        connection.Close();
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Invalid name/measurement!\n");
+                    }
+                }
+            }
+        }
+        else
+        {
+            SelectNameAndMeasurement(out habbitName, out habbitMeasurement);
         }
 
         string input = "";
@@ -50,29 +77,17 @@ internal class Program
                     Console.WriteLine("Exiting...");
                     break;
                 case "1":
-                    ViewRecords();
+                    ViewRecords(habbitName, habbitMeasurement);
                     break;
                 case "2":
-                    InsertRecord();
+                    InsertRecord(habbitName, habbitMeasurement);
                     break;
                 case "3":
-                    DeleteRecord();
+                    DeleteRecord(habbitName, habbitMeasurement);
                     break;
                 case "4":
-                    UpdateRecord();
+                    UpdateRecord(habbitName, habbitMeasurement);
                     break;
-            }
-        }
-
-        void ConnectDatabase()
-        {
-            string connectionSource = @"Data Source=HabitLogger.db";
-
-            using (var connection = new SqliteConnection(connectionSource))
-            {
-                connection.Open();
-
-                connection.Close();
             }
         }
 
@@ -90,9 +105,11 @@ internal class Program
             return Console.ReadLine();
         }
 
-        static void ViewRecords()
+        static void SelectNameAndMeasurement(out string habbitName, out string habbitMeasurement)
         {
-            Console.Clear();
+            habbitName = "";
+            habbitMeasurement = "";
+
             string connectionSource = @"Data Source=HabitLogger.db";
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -100,24 +117,34 @@ internal class Program
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = "SELECT * FROM water_glasses";
+                tableCommand.CommandText = $"SELECT name FROM sqlite_sequence";
+
+                Console.WriteLine($"Command text: {tableCommand.CommandText}");
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
-                    Console.WriteLine("Water glasses each day:");
                     while (reader.Read())
                     {
-                        Console.Write($"\n#{reader.GetInt32(0)} => ");
-                        Console.Write($"{reader.GetInt32(2)} glasses");
+                        habbitName = reader.GetString(0);
+                        Console.WriteLine(habbitName);
                     }
-                    Console.WriteLine();
+                }
+
+                tableCommand.CommandText = $"SELECT * FROM {habbitName}";
+
+                Console.WriteLine($"Command text: {tableCommand.CommandText}");
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    habbitMeasurement = reader.GetName(2);
+                    Console.WriteLine(habbitMeasurement);
                 }
 
                 connection.Close();
             }
         }
 
-        static void InsertRecord()
+        static void ViewRecords(string habbitName, string habbitMeasurement)
         {
             Console.Clear();
             string connectionSource = @"Data Source=HabitLogger.db";
@@ -127,7 +154,33 @@ internal class Program
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                Console.WriteLine("Enter the number of glasses consumed:");
+                tableCommand.CommandText = $"SELECT * FROM {habbitName}";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    Console.WriteLine($"Records from {habbitName}:");
+                    while (reader.Read())
+                    {
+                        Console.Write($"#{reader.GetInt32(0)} => ");
+                        Console.WriteLine($"{reader.GetInt32(2)} {habbitMeasurement}");
+                    }
+                }
+
+                connection.Close();
+            }
+        }
+
+        static void InsertRecord(string habbitName, string habbitMeasurement)
+        {
+            Console.Clear();
+            string connectionSource = @"Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                Console.WriteLine($"Enter the number of {habbitMeasurement}:");
 
                 while (true)
                 {
@@ -135,7 +188,7 @@ internal class Program
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"INSERT INTO water_glasses (count) VALUES ({number});";
+                        tableCommand.CommandText = $"INSERT INTO {habbitName} ({habbitMeasurement}) VALUES ({number});";
                         break;
                     }
                     else
@@ -149,7 +202,7 @@ internal class Program
             }
         }
 
-        static void DeleteRecord()
+        static void DeleteRecord(string habbitName, string habbitMeasurement)
         {
             Console.Clear();
             string connectionSource = @"Data Source=HabitLogger.db";
@@ -167,7 +220,7 @@ internal class Program
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"DELETE FROM water_glasses WHERE id = {number};";
+                        tableCommand.CommandText = $"DELETE FROM {habbitName} WHERE id = {number};";
                     }
                     else
                     {
@@ -196,7 +249,7 @@ internal class Program
             }
         }
 
-        static void UpdateRecord()
+        static void UpdateRecord(string habbitName, string habbitMeasurement)
         {
             Console.Clear();
             string connectionSource = @"Data Source=HabitLogger.db";
@@ -208,17 +261,17 @@ internal class Program
 
                 while (true)
                 {
-                    Console.WriteLine("\nChoose id to update:");
+                    Console.WriteLine("Choose id to update:");
                     string input = Console.ReadLine();
 
                     if (int.TryParse(input, out int number))
                     {
-                        Console.WriteLine("Choose a new number of glasses: ");
+                        Console.WriteLine($"Choose a new number of {habbitMeasurement}: ");
                         string input2 = Console.ReadLine();
 
                         if (int.TryParse(input2, out int newNumber))
                         {
-                            tableCommand.CommandText = $"UPDATE water_glasses SET count = {newNumber} WHERE id = {number};";
+                            tableCommand.CommandText = $"UPDATE {habbitName} SET {habbitMeasurement} = {newNumber} WHERE id = {number};";
                         }
                         else
                         {
