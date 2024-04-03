@@ -4,6 +4,7 @@
 // + show the user a menu of options
 // + users can insert~, delete+, update+ and view+ their logged habit
 // + users can create their own habits+, choose the unit of measurement of each habit+
+// + fix bug: can't get table name if no records! (tereikejo vietoj sqlite_sequence querinti duomenis is sqlite_master)
 // - Seed Data into the database automatically when the database gets created for the first time,
 //      (generating a few habits and inserting a hundred records with randomly generated values)
 // - get date from user (in Insert method?)
@@ -42,7 +43,7 @@ internal class Program
                             {habbitMeasurement} INTEGER
                         );";
 
-                    Console.WriteLine($"Command text: {tableCommand.CommandText}");
+                    //Console.WriteLine($"Command text: {tableCommand.CommandText}");
 
                     try
                     {
@@ -117,17 +118,15 @@ internal class Program
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT name FROM sqlite_sequence";
+                tableCommand.CommandText = $"SELECT name FROM sqlite_master";
 
                 Console.WriteLine($"Command text: {tableCommand.CommandText}");
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
-                    while (reader.Read())
-                    {
-                        habbitName = reader.GetString(0);
-                        Console.WriteLine(habbitName);
-                    }
+                    reader.Read();
+                    habbitName = reader.GetString(0);
+                    Console.WriteLine(habbitName);
                 }
 
                 tableCommand.CommandText = $"SELECT * FROM {habbitName}";
