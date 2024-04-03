@@ -11,6 +11,7 @@
 // - a report functionality where the users can view specific information
 // - fix all errors
 // - create a read me file
+// ? only have one table for habits and one for operations? (much more efficient on sacale) -> redo whole project?
 
 internal class Program
 {
