@@ -11,7 +11,12 @@
 // - a report functionality where the users can view specific information
 // - fix all errors
 // - create a read me file
-// ? only have one table for habits and one for operations? (much more efficient on sacale) -> redo whole project?
+// -> only have one table for habits and one for operations? (much more efficient on sacale) -> redo whole project
+// + create two tables at start
+// + auto create some habbits
+// - fix methods
+// - create option for new habbit
+// - create option to choose a habbit!
 
 internal class Program
 {
@@ -22,46 +27,20 @@ internal class Program
 
         if (!File.Exists("HabitLogger.db"))
         {
-            while (true)
-            {
-                Console.WriteLine("Choose a name for your habit (no spaces):");
-                habbitName = Console.ReadLine();
+            //Console.WriteLine("Choose a name for your habit (no spaces):");
+            //habbitName = Console.ReadLine();
 
-                Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
-                habbitMeasurement = Console.ReadLine();
+            //Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
+            //habbitMeasurement = Console.ReadLine();
 
-                string connectionSource = @"Data Source=HabitLogger.db";
+            CreateTwoTables();
 
-                using (var connection = new SqliteConnection(connectionSource))
-                {
-                    connection.Open();
-                    var tableCommand = connection.CreateCommand();
-
-                    tableCommand.CommandText = @$"
-                        CREATE TABLE IF NOT EXISTS {habbitName} ( 
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            date DATE,
-                            {habbitMeasurement} INTEGER
-                        );";
-
-                    //Console.WriteLine($"Command text: {tableCommand.CommandText}");
-
-                    try
-                    {
-                        tableCommand.ExecuteNonQuery();
-                        connection.Close();
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Invalid name/measurement!\n");
-                    }
-                }
-            }
+            GenerateHabits();
         }
         else
         {
-            SelectNameAndMeasurement(out habbitName, out habbitMeasurement);
+            Console.WriteLine("Database already exist!");
+            //SelectNameAndMeasurement(out habbitName, out habbitMeasurement);
         }
 
         string input = "";
@@ -82,13 +61,13 @@ internal class Program
                     ViewRecords(habbitName, habbitMeasurement);
                     break;
                 case "2":
-                    InsertRecord(habbitName, habbitMeasurement);
+                    //InsertRecord(habbitName, habbitMeasurement);
                     break;
                 case "3":
-                    DeleteRecord(habbitName, habbitMeasurement);
+                    //DeleteRecord(habbitName, habbitMeasurement);
                     break;
                 case "4":
-                    UpdateRecord(habbitName, habbitMeasurement);
+                    //UpdateRecord(habbitName, habbitMeasurement);
                     break;
             }
         }
@@ -105,6 +84,82 @@ internal class Program
             Console.WriteLine("---------------------------------------");
 
             return Console.ReadLine();
+        }
+
+        static void CreateTwoTables()
+        {
+            string connectionSource = @"Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = @$"
+                        CREATE TABLE IF NOT EXISTS Habits ( 
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            habbitName TEXT,
+                            measurementName TEXT
+                        );";
+
+                try
+                {
+                    tableCommand.ExecuteNonQuery();
+                    connection.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = @$"
+                        CREATE TABLE IF NOT EXISTS Operations ( 
+                            habbitID INTEGER,
+                            date DATE,
+                            measurement INTEGER
+                        );";
+
+                try
+                {
+                    tableCommand.ExecuteNonQuery();
+                    connection.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+        }
+
+        static void GenerateHabits()
+        {
+            string habbitName = "Exercise";
+            string habbitMeasurement = "Squats";
+
+            string connectionSource = @"Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"INSERT INTO Habits (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                tableCommand.ExecuteNonQuery();
+
+                habbitName = "Cycling";
+                habbitMeasurement = "Kilometers";
+
+                tableCommand.CommandText = $"INSERT INTO Habits (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                tableCommand.ExecuteNonQuery();
+
+                connection.Close();
+            }
         }
 
         static void SelectNameAndMeasurement(out string habbitName, out string habbitMeasurement)
