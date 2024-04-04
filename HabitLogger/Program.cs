@@ -16,7 +16,7 @@
 // + auto create some habbits
 // + create option to choose a habbit (by id)
 // + create option for new habbit
-// - fix methods
+// - fix methods (insert+, view+, delete-, update-)
 // - make sure id is selected correctly
 // - make separate classes for methods
 
@@ -24,8 +24,11 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        string habbitName = "";
-        string habbitMeasurement = "";
+        const string habitsTable = "Habits";
+        const string operationsTable = "Operations";
+
+        string habitName;
+        string habitMeasurement;
 
         if (!File.Exists("HabitLogger.db"))
         {
@@ -35,7 +38,7 @@ internal class Program
         }
         else
         {
-            Console.WriteLine("Database already exist!");
+            Console.WriteLine("Database already exist!\n");
             //SelectNameAndMeasurement(out habbitName, out habbitMeasurement);
         }
 
@@ -55,10 +58,10 @@ internal class Program
                 if (result == 0)
                 {
                     Console.WriteLine("Choose a name for your habit (no spaces):");
-                    habbitName = Console.ReadLine();
+                    habitName = Console.ReadLine();
 
                     Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
-                    habbitMeasurement = Console.ReadLine();
+                    habitMeasurement = Console.ReadLine();
 
                     string connectionSource = @"Data Source=HabitLogger.db";
 
@@ -67,10 +70,10 @@ internal class Program
                         connection.Open();
                         var tableCommand = connection.CreateCommand();
 
-                        tableCommand.CommandText = $"INSERT INTO Habits (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                        tableCommand.CommandText = $"INSERT INTO {habitsTable} (habbitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
                         tableCommand.ExecuteNonQuery();
 
-                        tableCommand.CommandText = "SELECT * FROM Habits ORDER by id DESC";
+                        tableCommand.CommandText = $"SELECT * FROM {habitsTable} ORDER by id DESC";
 
                         using (var reader = tableCommand.ExecuteReader())
                         {
@@ -88,7 +91,7 @@ internal class Program
             }
             else
             {
-                Console.WriteLine("Wrong input (enter a whole number)");
+                Console.WriteLine("Wrong input (enter a whole number)\n");
             }
         }
 
@@ -107,10 +110,10 @@ internal class Program
                     Console.WriteLine("Exiting...");
                     break;
                 case "1":
-                    ViewRecords(habbitName, habbitMeasurement);
+                    ViewRecords(habitId);
                     break;
                 case "2":
-                    //InsertRecord(habbitName, habbitMeasurement);
+                    InsertRecord(habitId);
                     break;
                 case "3":
                     //DeleteRecord(habbitName, habbitMeasurement);
@@ -196,13 +199,13 @@ internal class Program
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"INSERT INTO Habits (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                tableCommand.CommandText = $"INSERT INTO {habitsTable} (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
                 tableCommand.ExecuteNonQuery();
 
                 habbitName = "Cycling";
                 habbitMeasurement = "Kilometers";
 
-                tableCommand.CommandText = $"INSERT INTO Habits (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                tableCommand.CommandText = $"INSERT INTO {habitsTable} (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
                 tableCommand.ExecuteNonQuery();
             }
         }
@@ -216,7 +219,7 @@ internal class Program
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = "SELECT * FROM Habits";
+                tableCommand.CommandText = $"SELECT * FROM {habitsTable}";
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -265,9 +268,14 @@ internal class Program
             }
         }
 
-        static void ViewRecords(string habbitName, string habbitMeasurement)
+        static void ViewRecords(int id)
         {
             Console.Clear();
+            Console.WriteLine($"ID: {id}");
+
+            string habbitName = "";
+            string habbitMeasurement = "";
+
             string connectionSource = @"Data Source=HabitLogger.db";
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -275,29 +283,51 @@ internal class Program
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {habbitName}";
+                // make this using into method?
+                tableCommand.CommandText = $"SELECT * FROM {habitsTable} WHERE id='{id}'";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    reader.Read();
+                    habbitName = (string)reader.GetValue(1);
+                    habbitMeasurement = (string)reader.GetValue(2);
+                }
+
+                tableCommand.CommandText = $"SELECT * FROM {operationsTable} WHERE habbitID='{id}'";
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
                     Console.WriteLine($"Records from {habbitName}:");
+                    int counter = 1;
                     while (reader.Read())
                     {
-                        Console.Write($"#{reader.GetInt32(0)} => ");
+                        Console.Write($"{counter++}. ");
                         Console.WriteLine($"{reader.GetInt32(2)} {habbitMeasurement}");
                     }
                 }
             }
         }
 
-        static void InsertRecord(string habbitName, string habbitMeasurement)
+        static void InsertRecord(int id)
         {
             Console.Clear();
+            Console.WriteLine($"ID: {id}");
+
             string connectionSource = @"Data Source=HabitLogger.db";
+            string habbitMeasurement;
 
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"SELECT * FROM {habitsTable} WHERE id='{id}'";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    reader.Read();
+                    habbitMeasurement = reader.GetString(2);
+                }
 
                 Console.WriteLine($"Enter the number of {habbitMeasurement}:");
 
@@ -307,7 +337,7 @@ internal class Program
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"INSERT INTO {habbitName} ({habbitMeasurement}) VALUES ({number});";
+                        tableCommand.CommandText = $"INSERT INTO {operationsTable} (habbitID, measurement) VALUES ({id}, {number});";
                         break;
                     }
                     else
