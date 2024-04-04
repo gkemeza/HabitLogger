@@ -14,9 +14,11 @@
 // -> only have one table for habits and one for operations? (much more efficient on sacale) -> redo whole project
 // + create two tables at start
 // + auto create some habbits
+// + create option to choose a habbit (by id)
+// + create option for new habbit
 // - fix methods
-// - create option for new habbit
-// - create option to choose a habbit!
+// - make sure id is selected correctly
+// - make separate classes for methods
 
 internal class Program
 {
@@ -27,12 +29,6 @@ internal class Program
 
         if (!File.Exists("HabitLogger.db"))
         {
-            //Console.WriteLine("Choose a name for your habit (no spaces):");
-            //habbitName = Console.ReadLine();
-
-            //Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
-            //habbitMeasurement = Console.ReadLine();
-
             CreateTwoTables();
 
             GenerateHabits();
@@ -43,11 +39,64 @@ internal class Program
             //SelectNameAndMeasurement(out habbitName, out habbitMeasurement);
         }
 
+        int habitId = -1;
+
+        while (true)
+        {
+            Console.WriteLine("Choose a habit or create new:");
+            Console.WriteLine("0. Create a new habit");
+
+            ShowAllHabits();
+
+            string input2 = Console.ReadLine();
+
+            if (int.TryParse(input2, out int result))
+            {
+                if (result == 0)
+                {
+                    Console.WriteLine("Choose a name for your habit (no spaces):");
+                    habbitName = Console.ReadLine();
+
+                    Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
+                    habbitMeasurement = Console.ReadLine();
+
+                    string connectionSource = @"Data Source=HabitLogger.db";
+
+                    using (var connection = new SqliteConnection(connectionSource))
+                    {
+                        connection.Open();
+                        var tableCommand = connection.CreateCommand();
+
+                        tableCommand.CommandText = $"INSERT INTO Habits (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                        tableCommand.ExecuteNonQuery();
+
+                        tableCommand.CommandText = "SELECT * FROM Habits ORDER by id DESC";
+
+                        using (var reader = tableCommand.ExecuteReader())
+                        {
+                            reader.Read();
+                            habitId = reader.GetInt32(0);
+                            Console.WriteLine(reader.GetInt32(0));
+                        }
+                    }
+                }
+                else
+                {
+                    habitId = result;
+                }
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Wrong input (enter a whole number)");
+            }
+        }
+
         string input = "";
 
         while (input != "0")
         {
-            input = ShowMainMenu();
+            input = ShowMainMenu(habitId);
 
             if (input != "0" && input != "1" && input != "2" && input != "3" && input != "4")
                 Console.WriteLine("Wrong input!");
@@ -72,9 +121,9 @@ internal class Program
             }
         }
 
-        static string ShowMainMenu()
+        static string ShowMainMenu(int habitId)
         {
-            Console.WriteLine("\nMAIN MENU\n");
+            Console.WriteLine($"\nMAIN MENU ({habitId})\n");
             Console.WriteLine("What would you like to do?\n");
             Console.WriteLine("Type 0 to Close");
             Console.WriteLine("Type 1 to View all records");
@@ -105,7 +154,6 @@ internal class Program
                 try
                 {
                     tableCommand.ExecuteNonQuery();
-                    connection.Close();
                 }
                 catch (Exception ex)
                 {
@@ -128,7 +176,6 @@ internal class Program
                 try
                 {
                     tableCommand.ExecuteNonQuery();
-                    connection.Close();
                 }
                 catch (Exception ex)
                 {
@@ -157,8 +204,29 @@ internal class Program
 
                 tableCommand.CommandText = $"INSERT INTO Habits (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
                 tableCommand.ExecuteNonQuery();
+            }
+        }
 
-                connection.Close();
+        static void ShowAllHabits()
+        {
+            string connectionSource = "Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = "SELECT * FROM Habits";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Console.Write(reader.GetString(0) + ". ");
+                        Console.Write(reader.GetString(1));
+                        Console.WriteLine();
+                    }
+                }
             }
         }
 
@@ -167,7 +235,7 @@ internal class Program
             habbitName = "";
             habbitMeasurement = "";
 
-            string connectionSource = @"Data Source=HabitLogger.db";
+            string connectionSource = "Data Source=HabitLogger.db";
 
             using (var connection = new SqliteConnection(connectionSource))
             {
@@ -194,8 +262,6 @@ internal class Program
                     habbitMeasurement = reader.GetName(2);
                     Console.WriteLine(habbitMeasurement);
                 }
-
-                connection.Close();
             }
         }
 
@@ -220,8 +286,6 @@ internal class Program
                         Console.WriteLine($"{reader.GetInt32(2)} {habbitMeasurement}");
                     }
                 }
-
-                connection.Close();
             }
         }
 
@@ -253,7 +317,6 @@ internal class Program
                 }
 
                 tableCommand.ExecuteNonQuery();
-                connection.Close();
             }
         }
 
@@ -299,8 +362,6 @@ internal class Program
                         break;
                     }
                 }
-
-                connection.Close();
             }
         }
 
@@ -355,8 +416,6 @@ internal class Program
                         break;
                     }
                 }
-
-                connection.Close();
             }
         }
     }
