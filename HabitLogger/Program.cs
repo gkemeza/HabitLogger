@@ -5,20 +5,21 @@
 // + users can insert~, delete+, update+ and view+ their logged habit
 // + users can create their own habits+, choose the unit of measurement of each habit+
 // + fix bug: can't get table name if no records! (tereikejo vietoj sqlite_sequence querinti duomenis is sqlite_master)
-// - Seed Data into the database automatically when the database gets created for the first time,
-//      (generating a few habits and inserting a hundred records with randomly generated values)
-// - get date from user (in Insert method?)
-// - a report functionality where the users can view specific information
-// - fix all errors
-// - create a read me file
-// -> only have one table for habits and one for operations? (much more efficient on sacale) -> redo whole project
+// -> only have one table for habits and one for operations? (much more efficient on sacale) -> redo project
 // + create two tables at start
 // + auto create some habbits
 // + create option to choose a habbit (by id)
 // + create option for new habbit
-// - fix methods (insert+, view+, delete-, update-)
+// + add id column to operations (so that each op has unique id, so I can delete one)
+// - fix methods (insert+, view+, delete+, update-)
 // - make sure id is selected correctly
-// - make separate classes for methods
+// - Seed Data into the database automatically when the database gets created for the first time,
+//      (generating a few habits and inserting a hundred records with randomly generated values)
+// - get date from user (in Insert method?)
+// - a report functionality where the users can view specific information
+// - make separate classes for methods?
+// - fix all errors
+// - create a read me file
 
 internal class Program
 {
@@ -116,7 +117,7 @@ internal class Program
                     InsertRecord(habitId);
                     break;
                 case "3":
-                    //DeleteRecord(habbitName, habbitMeasurement);
+                    DeleteRecord(habitId);
                     break;
                 case "4":
                     //UpdateRecord(habbitName, habbitMeasurement);
@@ -171,6 +172,7 @@ internal class Program
 
                 tableCommand.CommandText = @$"
                         CREATE TABLE IF NOT EXISTS Operations ( 
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
                             habbitID INTEGER,
                             date DATE,
                             measurement INTEGER
@@ -298,11 +300,11 @@ internal class Program
                 using (var reader = tableCommand.ExecuteReader())
                 {
                     Console.WriteLine($"Records from {habbitName}:");
-                    int counter = 1;
+
                     while (reader.Read())
                     {
-                        Console.Write($"{counter++}. ");
-                        Console.WriteLine($"{reader.GetInt32(2)} {habbitMeasurement}");
+                        Console.Write($"{reader.GetInt32(0)}. ");
+                        Console.WriteLine($"{reader.GetInt32(3)} {habbitMeasurement}");
                     }
                 }
             }
@@ -350,9 +352,11 @@ internal class Program
             }
         }
 
-        static void DeleteRecord(string habbitName, string habbitMeasurement)
+        static void DeleteRecord(int id)
         {
             Console.Clear();
+            Console.WriteLine($"ID: {id}");
+
             string connectionSource = @"Data Source=HabitLogger.db";
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -360,7 +364,7 @@ internal class Program
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                Console.WriteLine("Choose id to delete:");
+                Console.WriteLine("Choose operation to delete:");
 
                 while (true)
                 {
@@ -368,7 +372,7 @@ internal class Program
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"DELETE FROM {habbitName} WHERE id = {number};";
+                        tableCommand.CommandText = $"DELETE FROM {operationsTable} WHERE id = {number};";
                     }
                     else
                     {
