@@ -8,12 +8,11 @@
 // + add id column to operations (so that each op has unique id, so I can delete one)
 // + fix methods (insert+, view+, delete+, update+)
 // + make methods GetHabitName() and GetMeasurement()
-// - Seed Data into the database automatically when the database gets created for the first time,
-//      (generating a few habits and inserting a hundred records with randomly generated values)
+// + Auto generate a few habits+ and insert a hundred records with randomly generated values+
+// - make a separate class for methods?
 // - get date from user (in Insert method?)
 // - make sure id is selected correctly
 // - a report functionality where users can view specific information
-// - make a separate class for methods?
 // - fix all errors
 // - create a read me file
 
@@ -32,6 +31,9 @@ internal class Program
             CreateTwoTables();
 
             GenerateHabits();
+
+            InsertRandomRecords(1);
+            InsertRandomRecords(2);
         }
         else
         {
@@ -206,6 +208,28 @@ internal class Program
 
                 tableCommand.CommandText = $"INSERT INTO {habitsTable} (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
                 tableCommand.ExecuteNonQuery();
+            }
+        }
+
+        static void InsertRandomRecords(int id)
+        {
+            string connectionSource = "Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                Random rand = new Random();
+                int counter = 0;
+
+                while (counter < 100)
+                {
+                    int number = rand.Next(100);
+                    tableCommand.CommandText = $"INSERT INTO {operationsTable} (habbitID, measurement) VALUES ({id}, {number});";
+                    tableCommand.ExecuteNonQuery();
+                    counter++;
+                }
             }
         }
 
