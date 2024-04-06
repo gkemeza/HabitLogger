@@ -1,11 +1,10 @@
 ﻿using HabitLogger;
-using Microsoft.Data.Sqlite;
 
 // -> only have one table for habits and one for operations? (much more efficient on sacale) -> redo project
 // + create two tables at start
-// + auto create some habbits
-// + create option to choose a habbit (by id)
-// + create option for new habbit
+// + auto create some habits
+// + create option to choose a habit (by id)
+// + create option for new habit
 // + add id column to operations (so that each op has unique id, so I can delete one)
 // + fix methods (insert+, view+, delete+, update+)
 // + make methods GetHabitName() and GetMeasurement()
@@ -26,11 +25,7 @@ internal class Program
 
     private static void Main(string[] args)
     {
-        Program program = new Program();
         Methods methods = new Methods();
-
-        string habitName;
-        string habitMeasurement;
 
         if (!File.Exists("HabitLogger.db"))
         {
@@ -46,7 +41,7 @@ internal class Program
             Console.WriteLine("Database already exist!\n");
         }
 
-        int habitId = -1;
+        int habitId;
 
         while (true)
         {
@@ -61,31 +56,7 @@ internal class Program
             {
                 if (result == 0)
                 {
-                    Console.WriteLine("Choose a name for your habit:");
-                    habitName = Console.ReadLine();
-
-                    Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
-                    habitMeasurement = Console.ReadLine();
-
-                    string connectionSource = @"Data Source=HabitLogger.db";
-
-                    using (var connection = new SqliteConnection(connectionSource))
-                    {
-                        connection.Open();
-                        var tableCommand = connection.CreateCommand();
-
-                        tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habbitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
-                        tableCommand.ExecuteNonQuery();
-
-                        tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} ORDER by id DESC";
-
-                        using (var reader = tableCommand.ExecuteReader())
-                        {
-                            reader.Read();
-                            habitId = reader.GetInt32(0);
-                            Console.WriteLine(reader.GetInt32(0));
-                        }
-                    }
+                    habitId = methods.CreateHabit();
                 }
                 else
                 {

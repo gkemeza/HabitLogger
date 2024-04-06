@@ -19,7 +19,7 @@ namespace HabitLogger
                 tableCommand.CommandText = @$"
                         CREATE TABLE IF NOT EXISTS Habits ( 
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            habbitName TEXT,
+                            habitName TEXT,
                             measurementName TEXT
                         );";
 
@@ -41,7 +41,7 @@ namespace HabitLogger
                 tableCommand.CommandText = @$"
                         CREATE TABLE IF NOT EXISTS Operations ( 
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            habbitID INTEGER,
+                            habitID INTEGER,
                             date DATE,
                             measurement INTEGER
                         );";
@@ -59,8 +59,8 @@ namespace HabitLogger
 
         public void GenerateHabits()
         {
-            string habbitName = "Exercise";
-            string habbitMeasurement = "Squats";
+            string habitName = "Exercise";
+            string habitMeasurement = "Squats";
 
             string connectionSource = @"Data Source=HabitLogger.db";
 
@@ -69,13 +69,13 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
                 tableCommand.ExecuteNonQuery();
 
-                habbitName = "Cycling";
-                habbitMeasurement = "Kilometers";
+                habitName = "Cycling";
+                habitMeasurement = "Kilometers";
 
-                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habbitName, measurementName) VALUES ('{habbitName}', '{habbitMeasurement}');";
+                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
                 tableCommand.ExecuteNonQuery();
             }
         }
@@ -97,7 +97,7 @@ namespace HabitLogger
                 while (counter < 100)
                 {
                     int number = rand.Next(100);
-                    tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habbitID, date, measurement) VALUES ({id}, '{date}', {number});";
+                    tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({id}, '{date}', {number});";
                     tableCommand.ExecuteNonQuery();
                     counter++;
                 }
@@ -127,6 +127,38 @@ namespace HabitLogger
             }
         }
 
+        public int CreateHabit()
+        {
+            string habitName;
+            string habitMeasurement;
+            int habitId;
+
+            Console.WriteLine("Choose a name for your habit:");
+            habitName = Console.ReadLine();
+
+            Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
+            habitMeasurement = Console.ReadLine();
+
+            string connectionSource = @"Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
+                tableCommand.ExecuteNonQuery();
+
+                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} ORDER by id DESC";
+                var reader = tableCommand.ExecuteReader();
+
+                reader.Read();
+                habitId = reader.GetInt32(0);
+            }
+
+            return habitId;
+        }
+
         public string ShowMainMenu(int habitId)
         {
             string habitName = GetHabitName(habitId);
@@ -149,7 +181,7 @@ namespace HabitLogger
             Console.WriteLine($"ID: {id}");
 
             string habitName = GetHabitName(id);
-            string habbitMeasurement = GetMeasurement(id);
+            string habitMeasurement = GetMeasurement(id);
 
             string connectionSource = "Data Source=HabitLogger.db";
 
@@ -158,7 +190,7 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habbitID = {id}";
+                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habitID = {id}";
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -168,7 +200,7 @@ namespace HabitLogger
                     {
                         Console.Write($"{reader.GetInt32(0)}. ");
                         Console.Write($"{reader.GetString(2)} | ");
-                        Console.WriteLine($"{reader.GetInt32(3)} {habbitMeasurement}");
+                        Console.WriteLine($"{reader.GetInt32(3)} {habitMeasurement}");
                     }
                 }
             }
@@ -208,7 +240,7 @@ namespace HabitLogger
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habbitID, date, measurement) VALUES ({id}, '{date}', {number});";
+                        tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({id}, '{date}', {number});";
                         break;
                     }
                     else
