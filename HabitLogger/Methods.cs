@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.Globalization;
 
 namespace HabitLogger
 {
@@ -88,13 +89,15 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
+                string date = DateTime.Now.ToShortDateString();
+
                 Random rand = new Random();
                 int counter = 0;
 
                 while (counter < 100)
                 {
                     int number = rand.Next(100);
-                    tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habbitID, measurement) VALUES ({id}, {number});";
+                    tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habbitID, date, measurement) VALUES ({id}, '{date}', {number});";
                     tableCommand.ExecuteNonQuery();
                     counter++;
                 }
@@ -155,7 +158,7 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habbitID='{id}'";
+                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habbitID = {id}";
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -164,6 +167,7 @@ namespace HabitLogger
                     while (reader.Read())
                     {
                         Console.Write($"{reader.GetInt32(0)}. ");
+                        Console.Write($"{reader.GetString(2)} | ");
                         Console.WriteLine($"{reader.GetInt32(3)} {habbitMeasurement}");
                     }
                 }
@@ -183,6 +187,11 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
+                string systemFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+                Console.WriteLine($"Enter the date ({systemFormat}):");
+
+                string date = Console.ReadLine();
+
                 Console.WriteLine($"Enter the number of {habitMeasurement}:");
 
                 while (true)
@@ -191,7 +200,7 @@ namespace HabitLogger
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habbitID, measurement) VALUES ({id}, {number});";
+                        tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habbitID, date, measurement) VALUES ({id}, '{date}', {number});";
                         break;
                     }
                     else
@@ -276,12 +285,17 @@ namespace HabitLogger
 
                     if (int.TryParse(input, out int number))
                     {
+                        string systemFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+                        Console.WriteLine($"Enter the date ({systemFormat}):");
+
+                        string date = Console.ReadLine();
+
                         Console.WriteLine($"Choose a new number of {habitMeasurement}: ");
                         string input2 = Console.ReadLine();
 
                         if (int.TryParse(input2, out int newNumber))
                         {
-                            tableCommand.CommandText = $"UPDATE {program.operationsTable} SET measurement = {newNumber} WHERE id = {number};";
+                            tableCommand.CommandText = $"UPDATE {program.operationsTable} SET date = '{date}', measurement = {newNumber} WHERE id = {number};";
                         }
                         else
                         {
@@ -324,7 +338,7 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id='{id}'";
+                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id = {id}";
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -345,7 +359,7 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id='{id}'";
+                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id = {id}";
 
                 using (var reader = tableCommand.ExecuteReader())
                 {

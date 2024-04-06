@@ -10,11 +10,12 @@ using Microsoft.Data.Sqlite;
 // + fix methods (insert+, view+, delete+, update+)
 // + make methods GetHabitName() and GetMeasurement()
 // + Auto generate a few habits+ and insert a hundred records with randomly generated values+
-// - make a separate class for methods?
-// - fix bug: can delete/update records from other habits
-// - get date from user (in Insert method?)
-// - make sure id is selected correctly
+// + make a separate class for methods
+// + get date from user
+// - add date validation
 // - a report functionality where users can view specific information
+// - fix bug: can delete/update records from other habits
+// - make sure id is selected correctly
 // - fix all errors
 // - create a read me file
 
