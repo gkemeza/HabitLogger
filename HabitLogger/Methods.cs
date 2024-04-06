@@ -134,7 +134,7 @@ namespace HabitLogger
             Console.WriteLine($"\nMAIN MENU ({habitName})\n");
             Console.WriteLine("What would you like to do?\n");
             Console.WriteLine("Type 0 to Close");
-            Console.WriteLine("Type 1 to View all records");
+            Console.WriteLine("Type 1 to View records");
             Console.WriteLine("Type 2 to Insert record");
             Console.WriteLine("Type 3 to Delete record");
             Console.WriteLine("Type 4 to Update record");
@@ -192,6 +192,14 @@ namespace HabitLogger
 
                 string date = Console.ReadLine();
 
+                while (!DateTime.TryParseExact(date, systemFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out _))
+                {
+                    Console.WriteLine("Invalid date!");
+                    Console.WriteLine($"Enter the date in correct format ({systemFormat}):");
+
+                    date = Console.ReadLine();
+                }
+
                 Console.WriteLine($"Enter the number of {habitMeasurement}:");
 
                 while (true)
@@ -205,7 +213,7 @@ namespace HabitLogger
                     }
                     else
                     {
-                        Console.WriteLine("Wrong input (enter a whole number):");
+                        Console.WriteLine("Invalid number (enter a whole number):");
                     }
                 }
 
@@ -278,52 +286,49 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                while (true)
+                Console.WriteLine("Choose id to update:");
+                string input = Console.ReadLine();
+
+                if (int.TryParse(input, out int number))
                 {
-                    Console.WriteLine("Choose id to update:");
-                    string input = Console.ReadLine();
+                    string systemFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+                    Console.WriteLine($"Enter the date ({systemFormat}):");
 
-                    if (int.TryParse(input, out int number))
+                    string date = Console.ReadLine();
+
+                    while (!DateTime.TryParseExact(date, systemFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out _))
                     {
-                        string systemFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-                        Console.WriteLine($"Enter the date ({systemFormat}):");
+                        Console.WriteLine("Invalid date!");
+                        Console.WriteLine($"Enter the date in correct format ({systemFormat}):");
 
-                        string date = Console.ReadLine();
-
-                        Console.WriteLine($"Choose a new number of {habitMeasurement}: ");
-                        string input2 = Console.ReadLine();
-
-                        if (int.TryParse(input2, out int newNumber))
-                        {
-                            tableCommand.CommandText = $"UPDATE {program.operationsTable} SET date = '{date}', measurement = {newNumber} WHERE id = {number};";
-                        }
-                        else
-                        {
-                            Console.WriteLine("Wrong input (enter a whole number).");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Wrong input id (view records to get ids)");
-                        break;
+                        date = Console.ReadLine();
                     }
 
-                    int rowsDeleted = tableCommand.ExecuteNonQuery();
+                    Console.WriteLine($"Choose a new number of {habitMeasurement}: ");
+                    string input2 = Console.ReadLine();
 
-                    if (rowsDeleted == 0)
+                    while (!int.TryParse(input2, out int _))
                     {
-                        Console.WriteLine($"ID {number} doesn't exist. (view records to get ids)");
-                        break;
+                        Console.WriteLine("Wrong input (enter a whole number):");
+                        input2 = Console.ReadLine();
                     }
-                    else if (rowsDeleted == -1)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Record ID {number} updated");
-                        break;
-                    }
+
+                    tableCommand.CommandText = $"UPDATE {program.operationsTable} SET date = '{date}', measurement = {input2} WHERE id = {number};";
+                }
+                else
+                {
+                    Console.WriteLine("Wrong input id (id is a whole number)");
+                }
+
+                int rowsUpdated = tableCommand.ExecuteNonQuery();
+
+                if (rowsUpdated == 0)
+                {
+                    Console.WriteLine($"ID {number} doesn't exist. (view records to get ids)");
+                }
+                else if (rowsUpdated == 1)
+                {
+                    Console.WriteLine($"Record ID {number} updated");
                 }
             }
         }

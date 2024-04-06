@@ -12,7 +12,7 @@ using Microsoft.Data.Sqlite;
 // + Auto generate a few habits+ and insert a hundred records with randomly generated values+
 // + make a separate class for methods
 // + get date from user
-// - add date validation
+// + add date validation
 // - a report functionality where users can view specific information
 // - fix bug: can delete/update records from other habits
 // - make sure id is selected correctly
