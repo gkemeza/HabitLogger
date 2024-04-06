@@ -170,6 +170,7 @@ namespace HabitLogger
             Console.WriteLine("Type 2 to Insert record");
             Console.WriteLine("Type 3 to Delete record");
             Console.WriteLine("Type 4 to Update record");
+            Console.WriteLine("Type 5 to View reports");
             Console.WriteLine("---------------------------------------");
 
             return Console.ReadLine();
@@ -363,6 +364,17 @@ namespace HabitLogger
                     Console.WriteLine($"Record ID {number} updated");
                 }
             }
+        }
+
+        public void ViewReports(int id)
+        {
+            string habitMeasurement = GetMeasurement(id);
+
+            Console.WriteLine("Choose a report to see specific information: ");
+            Console.WriteLine($"Type 0 to Leave");
+            Console.WriteLine($"Type 1 to see total {habitMeasurement}");
+            Console.WriteLine($"Type 2 to see total {habitMeasurement}");
+            Console.WriteLine("---------------------------------------");
         }
 
         string GetHabitName(int id)

@@ -76,7 +76,7 @@ internal class Program
         {
             input = methods.ShowMainMenu(habitId);
 
-            if (input != "0" && input != "1" && input != "2" && input != "3" && input != "4")
+            if (input != "0" && input != "1" && input != "2" && input != "3" && input != "4" && input != "5")
                 Console.WriteLine("Wrong input!");
 
             switch (input)
@@ -95,6 +95,9 @@ internal class Program
                     break;
                 case "4":
                     methods.UpdateRecord(habitId);
+                    break;
+                case "5":
+                    methods.ViewReports(habitId);
                     break;
             }
         }
