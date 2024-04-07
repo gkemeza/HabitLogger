@@ -186,9 +186,8 @@ namespace HabitLogger
             Console.WriteLine("Choose a report to see specific information: ");
             Console.WriteLine($"Type 0 to Leave");
             Console.WriteLine($"Type 1 to see total {habitMeasurement}");
-            Console.WriteLine($"Type 2 to see most {habitMeasurement} in one time");
-            Console.WriteLine($"Type 3 to see average {habitMeasurement}");
-            //Console.WriteLine($"Type 4 to see average {habitMeasurement}");
+            Console.WriteLine($"Type 2 to see average {habitMeasurement}");
+            Console.WriteLine($"Type 3 to see most {habitMeasurement} in one time");
             Console.WriteLine("---------------------------------------");
 
             return Console.ReadLine();
@@ -401,10 +400,10 @@ namespace HabitLogger
                         Total(id);
                         break;
                     case "2":
-                        MostAtOnce(id);
+                        Average(id);
                         break;
                     case "3":
-                        Average(id);
+                        MostAtOnce(id);
                         break;
                 }
             }
@@ -433,29 +432,6 @@ namespace HabitLogger
             }
         }
 
-        public void MostAtOnce(int id)
-        {
-            string habitMeasurement = GetMeasurement(id);
-
-            string connectionSource = "Data Source=HabitLogger.db";
-
-            using (var connection = new SqliteConnection(connectionSource))
-            {
-                connection.Open();
-                var tableCommand = connection.CreateCommand();
-
-                tableCommand.CommandText = $"SELECT MAX (measurement) FROM Operations WHERE habitID = '{id}'";
-
-                using (var reader = tableCommand.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        Console.WriteLine($"Most {habitMeasurement} in one time: {reader.GetInt32(0)}");
-                    }
-                }
-            }
-        }
-
         public void Average(int id)
         {
             string habitMeasurement = GetMeasurement(id);
@@ -474,6 +450,29 @@ namespace HabitLogger
                     while (reader.Read())
                     {
                         Console.WriteLine($"Average {habitMeasurement}: {Math.Round(reader.GetDouble(0))}");
+                    }
+                }
+            }
+        }
+
+        public void MostAtOnce(int id)
+        {
+            string habitMeasurement = GetMeasurement(id);
+
+            string connectionSource = "Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"SELECT MAX (measurement) FROM Operations WHERE habitID = '{id}'";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"Most {habitMeasurement} in one time: {reader.GetInt32(0)}");
                     }
                 }
             }
