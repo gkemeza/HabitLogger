@@ -89,14 +89,15 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                string date = DateTime.Now.ToShortDateString();
-
                 Random rand = new Random();
                 int counter = 0;
+                int daysRange = 5 * 365;
 
                 while (counter < 100)
                 {
-                    int number = rand.Next(100);
+                    int number = rand.Next(101);
+                    string date = DateTime.Today.AddDays(-rand.Next(daysRange)).ToShortDateString();
+
                     tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({id}, '{date}', {number});";
                     tableCommand.ExecuteNonQuery();
                     counter++;
@@ -171,6 +172,23 @@ namespace HabitLogger
             Console.WriteLine("Type 3 to Delete record");
             Console.WriteLine("Type 4 to Update record");
             Console.WriteLine("Type 5 to View reports");
+            Console.WriteLine("---------------------------------------");
+
+            return Console.ReadLine();
+        }
+
+        public string ShowReportsMenu(int habitId)
+        {
+            string habitName = GetHabitName(habitId);
+            string habitMeasurement = GetMeasurement(habitId);
+
+            Console.WriteLine($"\nREPORTS MENU ({habitName})\n");
+            Console.WriteLine("Choose a report to see specific information: ");
+            Console.WriteLine($"Type 0 to Leave");
+            Console.WriteLine($"Type 1 to see total {habitMeasurement}");
+            Console.WriteLine($"Type 2 to see most {habitMeasurement} in one time");
+            Console.WriteLine($"Type 3 to see average {habitMeasurement}");
+            //Console.WriteLine($"Type 4 to see average {habitMeasurement}");
             Console.WriteLine("---------------------------------------");
 
             return Console.ReadLine();
@@ -368,13 +386,97 @@ namespace HabitLogger
 
         public void ViewReports(int id)
         {
+            string input = "";
+
+            while (input != "0")
+            {
+                input = ShowReportsMenu(id);
+
+                if (input != "0" && input != "1" && input != "2" && input != "3")
+                    Console.WriteLine("Wrong input!");
+
+                switch (input)
+                {
+                    case "1":
+                        Total(id);
+                        break;
+                    case "2":
+                        MostAtOnce(id);
+                        break;
+                    case "3":
+                        Average(id);
+                        break;
+                }
+            }
+        }
+
+        public void Total(int id)
+        {
             string habitMeasurement = GetMeasurement(id);
 
-            Console.WriteLine("Choose a report to see specific information: ");
-            Console.WriteLine($"Type 0 to Leave");
-            Console.WriteLine($"Type 1 to see total {habitMeasurement}");
-            Console.WriteLine($"Type 2 to see total {habitMeasurement}");
-            Console.WriteLine("---------------------------------------");
+            string connectionSource = "Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"SELECT SUM (measurement) FROM Operations WHERE habitID = '{id}'";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"Total {habitMeasurement}: {reader.GetInt32(0)}");
+                    }
+                }
+            }
+        }
+
+        public void MostAtOnce(int id)
+        {
+            string habitMeasurement = GetMeasurement(id);
+
+            string connectionSource = "Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"SELECT MAX (measurement) FROM Operations WHERE habitID = '{id}'";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"Most {habitMeasurement} in one time: {reader.GetInt32(0)}");
+                    }
+                }
+            }
+        }
+
+        public void Average(int id)
+        {
+            string habitMeasurement = GetMeasurement(id);
+
+            string connectionSource = "Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"SELECT AVG (measurement) FROM Operations WHERE habitID = '{id}'";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"Average {habitMeasurement}: {Math.Round(reader.GetDouble(0))}");
+                    }
+                }
+            }
         }
 
         string GetHabitName(int id)

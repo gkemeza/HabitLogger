@@ -12,8 +12,9 @@
 // + make a separate class for methods
 // + get date from user
 // + add date validation
-// - a report functionality where users can view specific information
-// - fix bug: can delete/update records from other habits
+// + add random dates for generated habits
+// ~ a report functionality where users can view specific information
+// - fix bug: can delete/update records from other habits, can enter negative measurement numbers?
 // - make sure id is selected correctly
 // - fix all errors
 // - create a read me file
