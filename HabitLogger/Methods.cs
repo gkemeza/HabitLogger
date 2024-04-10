@@ -140,6 +140,8 @@ namespace HabitLogger
             Console.WriteLine("Choose a unit of measurement for your habit (measured by quantity):");
             habitMeasurement = Console.ReadLine();
 
+            Console.WriteLine();
+
             string connectionSource = @"Data Source=HabitLogger.db";
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -158,6 +160,32 @@ namespace HabitLogger
             }
 
             return habitId;
+        }
+
+        public bool ValidId(int idNumber)
+        {
+            string connectionSource = "Data Source=HabitLogger.db";
+            string habitName;
+
+            List<int> list = new List<int>();
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable}";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(reader.GetInt32(0));
+                    }
+                }
+            }
+
+            return list.Contains(idNumber);
         }
 
         public string ShowMainMenu(int habitId)
@@ -196,7 +224,6 @@ namespace HabitLogger
         public void ViewRecords(int id)
         {
             Console.Clear();
-            Console.WriteLine($"ID: {id}");
 
             string habitName = GetHabitName(id);
             string habitMeasurement = GetMeasurement(id);
@@ -227,7 +254,6 @@ namespace HabitLogger
         public void InsertRecord(int id)
         {
             Console.Clear();
-            Console.WriteLine($"ID: {id}");
 
             string connectionSource = "Data Source=HabitLogger.db";
             string habitMeasurement = GetMeasurement(id);
@@ -258,8 +284,15 @@ namespace HabitLogger
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({id}, '{date}', {number});";
-                        break;
+                        if (number >= 0)
+                        {
+                            tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({id}, '{date}', {number});";
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid number (enter a positive number):");
+                        }
                     }
                     else
                     {
@@ -279,7 +312,6 @@ namespace HabitLogger
         public void DeleteRecord(int id)
         {
             Console.Clear();
-            Console.WriteLine($"ID: {id}");
 
             string connectionSource = "Data Source=HabitLogger.db";
 
@@ -296,7 +328,7 @@ namespace HabitLogger
 
                     if (int.TryParse(input, out int number))
                     {
-                        tableCommand.CommandText = $"DELETE FROM {program.operationsTable} WHERE id = {number};";
+                        tableCommand.CommandText = $"DELETE FROM {program.operationsTable} WHERE id = {number} AND habitId = '{id}'";
                     }
                     else
                     {
@@ -310,11 +342,7 @@ namespace HabitLogger
                         Console.WriteLine($"ID {number} doesn't exist (view records to get ids).");
                         break;
                     }
-                    else if (rowsDeleted == -1)
-                    {
-                        continue;
-                    }
-                    else
+                    else if (rowsDeleted == 1)
                     {
                         Console.WriteLine($"Record ID {number} deleted");
                         break;
@@ -326,7 +354,6 @@ namespace HabitLogger
         public void UpdateRecord(int id)
         {
             Console.Clear();
-            Console.WriteLine($"ID: {id}");
 
             string connectionSource = "Data Source=HabitLogger.db";
             string habitMeasurement = GetMeasurement(id);
@@ -363,7 +390,8 @@ namespace HabitLogger
                         input2 = Console.ReadLine();
                     }
 
-                    tableCommand.CommandText = $"UPDATE {program.operationsTable} SET date = '{date}', measurement = {input2} WHERE id = {number};";
+                    tableCommand.CommandText = @$"UPDATE {program.operationsTable} SET date = '{date}', measurement = {input2} 
+                                                WHERE id = {number} AND habitId = '{id}';";
                 }
                 else
                 {
@@ -385,6 +413,8 @@ namespace HabitLogger
 
         public void ViewReports(int id)
         {
+            Console.Clear();
+
             string input = "";
 
             while (input != "0")
@@ -407,10 +437,14 @@ namespace HabitLogger
                         break;
                 }
             }
+
+            Console.Clear();
         }
 
         public void Total(int id)
         {
+            Console.Clear();
+
             string habitMeasurement = GetMeasurement(id);
 
             string connectionSource = "Data Source=HabitLogger.db";
@@ -434,6 +468,8 @@ namespace HabitLogger
 
         public void Average(int id)
         {
+            Console.Clear();
+
             string habitMeasurement = GetMeasurement(id);
 
             string connectionSource = "Data Source=HabitLogger.db";
@@ -457,6 +493,8 @@ namespace HabitLogger
 
         public void MostAtOnce(int id)
         {
+            Console.Clear();
+
             string habitMeasurement = GetMeasurement(id);
 
             string connectionSource = "Data Source=HabitLogger.db";
@@ -496,6 +534,7 @@ namespace HabitLogger
                     habitName = reader.GetString(1);
                 }
             }
+
             return habitName;
         }
 
@@ -517,6 +556,7 @@ namespace HabitLogger
                     habitMeasurement = reader.GetString(2);
                 }
             }
+
             return habitMeasurement;
         }
     }

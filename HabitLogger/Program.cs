@@ -13,10 +13,10 @@
 // + get date from user
 // + add date validation
 // + add random dates for generated habits
-// ~ a report functionality where users can view specific information
-// - fix bug: can delete/update records from other habits, can enter negative measurement numbers?
-// - make sure id is selected correctly
-// - fix all errors
+// + a report functionality where users can view specific information
+// + make sure id is selected correctly
+// + fix bug: can delete/update records from other habits+, can enter negative measurement numbers+
+// - viewRecords() sometimes prints to console multiple times, but doesn't happen when debugging. WHY?
 // - create a read me file
 
 internal class Program
@@ -53,17 +53,25 @@ internal class Program
 
             string input2 = Console.ReadLine();
 
-            if (int.TryParse(input2, out int result))
+            if (int.TryParse(input2, out int inputId))
             {
-                if (result == 0)
+                if (inputId == 0)
                 {
                     habitId = methods.CreateHabit();
+                    break;
                 }
                 else
                 {
-                    habitId = result;
+                    if (methods.ValidId(inputId))
+                    {
+                        habitId = inputId;
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid id!\n");
+                    }
                 }
-                break;
             }
             else
             {
