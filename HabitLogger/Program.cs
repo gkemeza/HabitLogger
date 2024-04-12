@@ -1,25 +1,5 @@
 ﻿using HabitLogger;
 
-// -> only have one table for habits and one for operations? (much more efficient on sacale) -> redo project
-// + create two tables at start
-// + auto create some habits
-// + create option to choose a habit (by id)
-// + create option for new habit
-// + add id column to operations (so that each op has unique id, so I can delete one)
-// + fix methods (insert+, view+, delete+, update+)
-// + make methods GetHabitName() and GetMeasurement()
-// + Auto generate a few habits+ and insert a hundred records with randomly generated values+
-// + make a separate class for methods
-// + get date from user
-// + add date validation
-// + add random dates for generated habits
-// + a report functionality where users can view specific information
-// + make sure id is selected correctly
-// + fix bug: can delete/update records from other habits+, can enter negative measurement numbers+
-// ~ viewRecords() sometimes prints to console multiple times, but doesn't happen when debugging.
-// + create a read me file
-// + check if there are records before viewing reports
-
 internal class Program
 {
     public string operationsTable = "Operations";
