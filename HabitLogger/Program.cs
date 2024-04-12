@@ -16,8 +16,9 @@
 // + a report functionality where users can view specific information
 // + make sure id is selected correctly
 // + fix bug: can delete/update records from other habits+, can enter negative measurement numbers+
-// - viewRecords() sometimes prints to console multiple times, but doesn't happen when debugging. WHY?
-// - create a read me file
+// ~ viewRecords() sometimes prints to console multiple times, but doesn't happen when debugging.
+// + create a read me file
+// - check if there are records before viewing reports
 
 internal class Program
 {
@@ -37,10 +38,6 @@ internal class Program
             methods.InsertRandomRecords(1);
             methods.InsertRandomRecords(2);
         }
-        else
-        {
-            Console.WriteLine("Database already exist!\n");
-        }
 
         int habitId;
 
@@ -57,6 +54,7 @@ internal class Program
             {
                 if (inputId == 0)
                 {
+                    Console.Clear();
                     habitId = methods.CreateHabit();
                     break;
                 }
@@ -64,6 +62,7 @@ internal class Program
                 {
                     if (methods.ValidId(inputId))
                     {
+                        Console.Clear();
                         habitId = inputId;
                         break;
                     }

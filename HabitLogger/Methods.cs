@@ -124,6 +124,7 @@ namespace HabitLogger
                         Console.Write(reader.GetString(1));
                         Console.WriteLine();
                     }
+                    Console.WriteLine("-----------------------------------");
                 }
             }
         }
@@ -200,7 +201,7 @@ namespace HabitLogger
             Console.WriteLine("Type 3 to Delete record");
             Console.WriteLine("Type 4 to Update record");
             Console.WriteLine("Type 5 to View reports");
-            Console.WriteLine("---------------------------------------");
+            Console.WriteLine("-----------------------------------");
 
             return Console.ReadLine();
         }
