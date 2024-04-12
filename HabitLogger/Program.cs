@@ -18,7 +18,7 @@
 // + fix bug: can delete/update records from other habits+, can enter negative measurement numbers+
 // ~ viewRecords() sometimes prints to console multiple times, but doesn't happen when debugging.
 // + create a read me file
-// - check if there are records before viewing reports
+// + check if there are records before viewing reports
 
 internal class Program
 {

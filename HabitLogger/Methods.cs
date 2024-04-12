@@ -241,6 +241,7 @@ namespace HabitLogger
                 using (var reader = tableCommand.ExecuteReader())
                 {
                     Console.WriteLine($"Records from {habitName}:");
+                    Console.WriteLine($"ID |   Date    |  Measurement\n");
 
                     while (reader.Read())
                     {
@@ -412,9 +413,40 @@ namespace HabitLogger
             }
         }
 
+        public bool OperationsAvailable(int id)
+        {
+            string connectionSource = "Data Source=HabitLogger.db";
+
+            using (var connection = new SqliteConnection(connectionSource))
+            {
+                connection.Open();
+                var tableCommand = connection.CreateCommand();
+
+                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habitID = {id}";
+
+                using (var reader = tableCommand.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
         public void ViewReports(int id)
         {
             Console.Clear();
+
+            if (!OperationsAvailable(id))
+            {
+                Console.WriteLine("There are no data in this habit (insert records first).");
+                return;
+            }
 
             string input = "";
 
