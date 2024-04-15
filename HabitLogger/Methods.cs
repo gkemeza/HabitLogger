@@ -7,10 +7,10 @@ namespace HabitLogger
     {
         Program program = new Program();
 
+        string connectionSource = "Data Source=HabitLogger.db";
+
         public void CreateTwoTables()
         {
-            string connectionSource = @"Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -62,8 +62,6 @@ namespace HabitLogger
             string habitName = "Exercise";
             string habitMeasurement = "Squats";
 
-            string connectionSource = @"Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -82,8 +80,6 @@ namespace HabitLogger
 
         public void InsertRandomRecords(int id)
         {
-            string connectionSource = "Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -107,8 +103,6 @@ namespace HabitLogger
 
         public void ShowAllHabits()
         {
-            string connectionSource = "Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -143,8 +137,6 @@ namespace HabitLogger
 
             Console.WriteLine();
 
-            string connectionSource = @"Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -165,8 +157,6 @@ namespace HabitLogger
 
         public bool ValidId(int idNumber)
         {
-            string connectionSource = "Data Source=HabitLogger.db";
-
             List<int> list = new List<int>();
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -228,8 +218,6 @@ namespace HabitLogger
             string habitName = GetHabitName(id);
             string habitMeasurement = GetMeasurement(id);
 
-            string connectionSource = "Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -256,7 +244,6 @@ namespace HabitLogger
         {
             Console.Clear();
 
-            string connectionSource = "Data Source=HabitLogger.db";
             string habitMeasurement = GetMeasurement(id);
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -315,8 +302,6 @@ namespace HabitLogger
         {
             Console.Clear();
 
-            string connectionSource = "Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -357,7 +342,6 @@ namespace HabitLogger
         {
             Console.Clear();
 
-            string connectionSource = "Data Source=HabitLogger.db";
             string habitMeasurement = GetMeasurement(id);
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -427,8 +411,6 @@ namespace HabitLogger
 
         public bool OperationsAvailable(int id)
         {
-            string connectionSource = "Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -494,8 +476,6 @@ namespace HabitLogger
 
             string habitMeasurement = GetMeasurement(id);
 
-            string connectionSource = "Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -518,8 +498,6 @@ namespace HabitLogger
             Console.Clear();
 
             string habitMeasurement = GetMeasurement(id);
-
-            string connectionSource = "Data Source=HabitLogger.db";
 
             using (var connection = new SqliteConnection(connectionSource))
             {
@@ -544,8 +522,6 @@ namespace HabitLogger
 
             string habitMeasurement = GetMeasurement(id);
 
-            string connectionSource = "Data Source=HabitLogger.db";
-
             using (var connection = new SqliteConnection(connectionSource))
             {
                 connection.Open();
@@ -565,7 +541,6 @@ namespace HabitLogger
 
         string GetHabitName(int id)
         {
-            string connectionSource = "Data Source=HabitLogger.db";
             string habitName;
 
             using (var connection = new SqliteConnection(connectionSource))
@@ -587,7 +562,6 @@ namespace HabitLogger
 
         string GetMeasurement(int id)
         {
-            string connectionSource = "Data Source=HabitLogger.db";
             string habitMeasurement;
 
             using (var connection = new SqliteConnection(connectionSource))
