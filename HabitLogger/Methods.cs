@@ -68,6 +68,8 @@ namespace HabitLogger
                 var tableCommand = connection.CreateCommand();
 
                 tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
+
+
                 tableCommand.ExecuteNonQuery();
 
                 habitName = "Cycling";
@@ -142,10 +144,15 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
+                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ({"@0"}, {"@1"})";
+
+                tableCommand.Parameters.AddWithValue("@0", habitName);
+                tableCommand.Parameters.AddWithValue("@1", habitMeasurement);
+
                 tableCommand.ExecuteNonQuery();
 
                 tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} ORDER by id DESC";
+
                 var reader = tableCommand.ExecuteReader();
 
                 reader.Read();
@@ -223,7 +230,9 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habitID = {id}";
+                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habitID = @0";
+
+                tableCommand.Parameters.AddWithValue("@0", id);
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -275,7 +284,11 @@ namespace HabitLogger
                         if (inputMeasurementToInsert >= 0)
                         {
                             tableCommand.CommandText = $@"INSERT INTO {program.operationsTable} (habitID, date, measurement) 
-                                                            VALUES ({id}, '{date}', {inputMeasurementToInsert});";
+                                                            VALUES ({"@0"}, {"@1"}, {"@2"});";
+
+                            tableCommand.Parameters.AddWithValue("@0", id);
+                            tableCommand.Parameters.AddWithValue("@1", date);
+                            tableCommand.Parameters.AddWithValue("@2", inputMeasurementToInsert);
                             break;
                         }
                         else
@@ -315,7 +328,10 @@ namespace HabitLogger
 
                     if (int.TryParse(inputId, out int inputIdToDelete))
                     {
-                        tableCommand.CommandText = $"DELETE FROM {program.operationsTable} WHERE id = {inputIdToDelete} AND habitId = '{id}'";
+                        tableCommand.CommandText = $"DELETE FROM {program.operationsTable} WHERE id = {"@0"} AND habitId = {"@1"}";
+
+                        tableCommand.Parameters.AddWithValue("@0", inputIdToDelete);
+                        tableCommand.Parameters.AddWithValue("@1", id);
                     }
                     else
                     {
@@ -376,8 +392,13 @@ namespace HabitLogger
                         {
                             if (inputMeasurementToUpdate >= 0)
                             {
-                                tableCommand.CommandText = @$"UPDATE {program.operationsTable} SET date = '{date}', measurement = {inputMeasurementToUpdate} 
-                                                WHERE id = {inputIdToUpdate} AND habitId = '{id}';";
+                                tableCommand.CommandText = @$"UPDATE {program.operationsTable} SET date = {"@0"}, measurement = {"@1"} 
+                                                WHERE id = {"@2"} AND habitId = {"@3"}";
+
+                                tableCommand.Parameters.AddWithValue("@0", date);
+                                tableCommand.Parameters.AddWithValue("@1", inputMeasurementToUpdate);
+                                tableCommand.Parameters.AddWithValue("@2", inputIdToUpdate);
+                                tableCommand.Parameters.AddWithValue("@3", id);
                                 break;
                             }
                             else
@@ -416,7 +437,9 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habitID = {id}";
+                tableCommand.CommandText = $"SELECT * FROM {program.operationsTable} WHERE habitID = {"@0"}";
+
+                tableCommand.Parameters.AddWithValue("@0", id);
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -481,7 +504,9 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT SUM (measurement) FROM Operations WHERE habitID = '{id}'";
+                tableCommand.CommandText = $"SELECT SUM (measurement) FROM Operations WHERE habitID = {"@0"}";
+
+                tableCommand.Parameters.AddWithValue("@0", id);
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -504,7 +529,9 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT AVG (measurement) FROM Operations WHERE habitID = '{id}'";
+                tableCommand.CommandText = $"SELECT AVG (measurement) FROM Operations WHERE habitID = {"@0"}";
+
+                tableCommand.Parameters.AddWithValue("@0", id);
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -527,7 +554,9 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT MAX (measurement) FROM Operations WHERE habitID = '{id}'";
+                tableCommand.CommandText = $"SELECT MAX (measurement) FROM Operations WHERE habitID = {"@0"}";
+
+                tableCommand.Parameters.AddWithValue("@0", id);
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -548,7 +577,9 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id = {id}";
+                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id = {"@0"}";
+
+                tableCommand.Parameters.AddWithValue("@0", id);
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
@@ -569,7 +600,9 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id = {id}";
+                tableCommand.CommandText = $"SELECT * FROM {program.habitsTable} WHERE id = {"@0"}";
+
+                tableCommand.Parameters.AddWithValue("@0", id);
 
                 using (var reader = tableCommand.ExecuteReader())
                 {
