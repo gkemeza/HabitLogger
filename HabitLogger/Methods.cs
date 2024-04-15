@@ -67,15 +67,23 @@ namespace HabitLogger
                 connection.Open();
                 var tableCommand = connection.CreateCommand();
 
-                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
+                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ({"@0"}, {"@1"})";
 
+                tableCommand.Parameters.AddWithValue("@0", habitName);
+                tableCommand.Parameters.AddWithValue("@1", habitMeasurement);
 
                 tableCommand.ExecuteNonQuery();
+
+                tableCommand.Parameters.Clear();
 
                 habitName = "Cycling";
                 habitMeasurement = "Kilometers";
 
-                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ('{habitName}', '{habitMeasurement}');";
+                tableCommand.CommandText = $"INSERT INTO {program.habitsTable} (habitName, measurementName) VALUES ({"@0"}, {"@1"})";
+
+                tableCommand.Parameters.AddWithValue("@0", habitName);
+                tableCommand.Parameters.AddWithValue("@1", habitMeasurement);
+
                 tableCommand.ExecuteNonQuery();
             }
         }
@@ -96,7 +104,13 @@ namespace HabitLogger
                     int number = rand.Next(101);
                     string date = DateTime.Today.AddDays(-rand.Next(daysRange)).ToShortDateString();
 
-                    tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({id}, '{date}', {number});";
+                    tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({"@0"}, {"@1"}, {"@2"})";
+
+                    tableCommand.Parameters.Clear();
+                    tableCommand.Parameters.AddWithValue("@0", id);
+                    tableCommand.Parameters.AddWithValue("@1", date);
+                    tableCommand.Parameters.AddWithValue("@2", number);
+
                     tableCommand.ExecuteNonQuery();
                     counter++;
                 }
@@ -284,7 +298,7 @@ namespace HabitLogger
                         if (inputMeasurementToInsert >= 0)
                         {
                             tableCommand.CommandText = $@"INSERT INTO {program.operationsTable} (habitID, date, measurement) 
-                                                            VALUES ({"@0"}, {"@1"}, {"@2"});";
+                                                            VALUES ({"@0"}, {"@1"}, {"@2"})";
 
                             tableCommand.Parameters.AddWithValue("@0", id);
                             tableCommand.Parameters.AddWithValue("@1", date);
