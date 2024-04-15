@@ -28,9 +28,9 @@ internal class Program
 
             methods.ShowAllHabits();
 
-            string input2 = Console.ReadLine();
+            string inputIdChoice = Console.ReadLine();
 
-            if (int.TryParse(input2, out int inputId))
+            if (int.TryParse(inputIdChoice, out int inputId))
             {
                 if (inputId == 0)
                 {
@@ -58,16 +58,18 @@ internal class Program
             }
         }
 
-        string input = "";
+        string inputMenuChoice = "";
 
-        while (input != "0")
+        while (inputMenuChoice != "0")
         {
-            input = methods.ShowMainMenu(habitId);
+            inputMenuChoice = methods.ShowMainMenu(habitId);
 
-            if (input != "0" && input != "1" && input != "2" && input != "3" && input != "4" && input != "5")
+            if (!new[] { "0", "1", "2", "3", "4", "5" }.Contains(inputMenuChoice))
+            {
                 Console.WriteLine("Wrong input!");
+            }
 
-            switch (input)
+            switch (inputMenuChoice)
             {
                 case "0":
                     Console.WriteLine("Exiting...");

@@ -166,7 +166,6 @@ namespace HabitLogger
         public bool ValidId(int idNumber)
         {
             string connectionSource = "Data Source=HabitLogger.db";
-            string habitName;
 
             List<int> list = new List<int>();
 
@@ -282,13 +281,14 @@ namespace HabitLogger
 
                 while (true)
                 {
-                    string input = Console.ReadLine();
+                    string inputMeasurement = Console.ReadLine();
 
-                    if (int.TryParse(input, out int number))
+                    if (int.TryParse(inputMeasurement, out int inputMeasurementToInsert))
                     {
-                        if (number >= 0)
+                        if (inputMeasurementToInsert >= 0)
                         {
-                            tableCommand.CommandText = $"INSERT INTO {program.operationsTable} (habitID, date, measurement) VALUES ({id}, '{date}', {number});";
+                            tableCommand.CommandText = $@"INSERT INTO {program.operationsTable} (habitID, date, measurement) 
+                                                            VALUES ({id}, '{date}', {inputMeasurementToInsert});";
                             break;
                         }
                         else
@@ -326,11 +326,11 @@ namespace HabitLogger
 
                 while (true)
                 {
-                    string input = Console.ReadLine();
+                    string inputId = Console.ReadLine();
 
-                    if (int.TryParse(input, out int number))
+                    if (int.TryParse(inputId, out int inputIdToDelete))
                     {
-                        tableCommand.CommandText = $"DELETE FROM {program.operationsTable} WHERE id = {number} AND habitId = '{id}'";
+                        tableCommand.CommandText = $"DELETE FROM {program.operationsTable} WHERE id = {inputIdToDelete} AND habitId = '{id}'";
                     }
                     else
                     {
@@ -341,12 +341,12 @@ namespace HabitLogger
 
                     if (rowsDeleted == 0)
                     {
-                        Console.WriteLine($"ID {number} doesn't exist (view records to get ids).");
+                        Console.WriteLine($"ID {inputIdToDelete} doesn't exist (view records to get ids).");
                         break;
                     }
                     else if (rowsDeleted == 1)
                     {
-                        Console.WriteLine($"Record ID {number} deleted");
+                        Console.WriteLine($"Record ID {inputIdToDelete} deleted");
                         break;
                     }
                 }
@@ -366,9 +366,9 @@ namespace HabitLogger
                 var tableCommand = connection.CreateCommand();
 
                 Console.WriteLine("Choose id to update:");
-                string input = Console.ReadLine();
+                string inputId = Console.ReadLine();
 
-                if (int.TryParse(input, out int number))
+                if (int.TryParse(inputId, out int inputIdToUpdate))
                 {
                     string systemFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
                     Console.WriteLine($"Enter the date ({systemFormat}):");
@@ -383,17 +383,29 @@ namespace HabitLogger
                         date = Console.ReadLine();
                     }
 
-                    Console.WriteLine($"Choose a new number of {habitMeasurement}: ");
-                    string input2 = Console.ReadLine();
-
-                    while (!int.TryParse(input2, out int _))
+                    while (true)
                     {
-                        Console.WriteLine("Wrong input (enter a whole number):");
-                        input2 = Console.ReadLine();
-                    }
+                        Console.WriteLine($"Choose a new number of {habitMeasurement}: ");
+                        string inputMeasurement = Console.ReadLine();
 
-                    tableCommand.CommandText = @$"UPDATE {program.operationsTable} SET date = '{date}', measurement = {input2} 
-                                                WHERE id = {number} AND habitId = '{id}';";
+                        if (int.TryParse(inputMeasurement, out int inputMeasurementToUpdate))
+                        {
+                            if (inputMeasurementToUpdate >= 0)
+                            {
+                                tableCommand.CommandText = @$"UPDATE {program.operationsTable} SET date = '{date}', measurement = {inputMeasurementToUpdate} 
+                                                WHERE id = {inputIdToUpdate} AND habitId = '{id}';";
+                                break;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Wrong input (enter a positive number)");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Wrong input (enter a whole number)");
+                        }
+                    }
                 }
                 else
                 {
@@ -404,11 +416,11 @@ namespace HabitLogger
 
                 if (rowsUpdated == 0)
                 {
-                    Console.WriteLine($"ID {number} doesn't exist. (view records to get ids)");
+                    Console.WriteLine($"ID {inputIdToUpdate} doesn't exist. (view records to get ids)");
                 }
                 else if (rowsUpdated == 1)
                 {
-                    Console.WriteLine($"Record ID {number} updated");
+                    Console.WriteLine($"Record ID {inputIdToUpdate} updated");
                 }
             }
         }
@@ -448,16 +460,18 @@ namespace HabitLogger
                 return;
             }
 
-            string input = "";
+            string inputReportChoice = "";
 
-            while (input != "0")
+            while (inputReportChoice != "0")
             {
-                input = ShowReportsMenu(id);
+                inputReportChoice = ShowReportsMenu(id);
 
-                if (input != "0" && input != "1" && input != "2" && input != "3")
+                if (new[] { "0", "1", "2", "3" }.Contains(inputReportChoice))
+                {
                     Console.WriteLine("Wrong input!");
+                }
 
-                switch (input)
+                switch (inputReportChoice)
                 {
                     case "1":
                         Total(id);
